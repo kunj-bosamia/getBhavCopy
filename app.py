@@ -82,6 +82,9 @@ def read_CSV_and_write_txt(bhav_copy_name , day , month_num , year):
 
 @app.route('/')
 def index():
+    bhav_copy_temp_dir = tempfile.mkdtemp()
+    print(bhav_copy_temp_dir)
+    print("_____________________________________")
     return render_template('index.html')
 
 @app.route('/download', methods=['POST'])
