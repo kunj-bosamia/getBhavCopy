@@ -85,6 +85,11 @@ def index():
     bhav_copy_temp_dir = tempfile.mkdtemp()
     print(bhav_copy_temp_dir)
     print("_____________________________________")
+    if not os.path.exists("/tmp/nse"):
+            os.makedirs("/tmp/nse")
+    file1 = open("/tmp/nse/ok.txt" , "w")
+    file1.writelines(["hii" , "byee"])
+    
     return render_template('index.html')
 
 @app.route('/download', methods=['POST'])
