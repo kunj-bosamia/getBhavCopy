@@ -95,7 +95,7 @@ def index():
 @app.route('/test')
 def test():
     file = open("/tmp/nse/ok.txt" , "r")
-    print(file)
+    print(file.read())
 
 
 @app.route('/download', methods=['POST'])
