@@ -6,6 +6,7 @@ import csv
 import os
 import sys
 from jugaad_data.nse import full_bhavcopy_save , bhavcopy_index_save
+import shutil
 
 
 app = Flask(__name__)
@@ -13,13 +14,13 @@ app = Flask(__name__)
 # year month and day are integer inputs
 def download_csv_from_nse(year , month , day):
     try:
-        if not os.path.exists("./bhav_copy"):
-            os.makedirs("./bhav_copy")
-        if not os.path.exists("./index"):
-            os.makedirs("./index")
+        if not os.path.exists("/tmp/bhav_copy"):
+            os.makedirs("/tmp/bhav_copy")
+        if not os.path.exists("/tmp/index"):
+            os.makedirs("/tmp/index")
         
-        full_bhavcopy_save(datetime.date(year,month,day) , "./bhav_copy")
-        bhavcopy_index_save(datetime.date(year,month,day), "./index")
+        full_bhavcopy_save(datetime.date(year,month,day) , "/tmp/bhav_copy")
+        bhavcopy_index_save(datetime.date(year,month,day), "/tmp/index")
         return True
     except Exception as e:
         print("Error while downloading CSVs : ",e)
@@ -28,17 +29,17 @@ def download_csv_from_nse(year , month , day):
 # day month_num year are of type string
 def read_CSV_and_write_txt(bhav_copy_name , day , month_num , year):
     try:
-        if not os.path.exists("./nse"):
-            os.makedirs("./nse")
+        if not os.path.exists("/tmp/nse"):
+            os.makedirs("/tmp/nse")
         
-        txt_fileName = "./nse/"+year+"-"+month_num+"-"+day+"-NSE-EQ.txt"
+        txt_fileName = "/tmp/nse/"+year+"-"+month_num+"-"+day+"-NSE-EQ.txt"
 
         if os.path.exists(txt_fileName):
             return True
 
         
         #bhav copy
-        csv_path  = "./bhav_copy/"+bhav_copy_name
+        csv_path  = "/tmp/bhav_copy/"+bhav_copy_name
         csv_file = open(csv_path , "r")
         csv_reader = csv.reader(csv_file)
         date_num_text = year+month_num+day
@@ -54,7 +55,7 @@ def read_CSV_and_write_txt(bhav_copy_name , day , month_num , year):
         csv_file.close()
 
         # index
-        csv_path  = "./index/"+"ind_close_all_"+day+month_num+year+".csv"
+        csv_path  = "/tmp/index/"+"ind_close_all_"+day+month_num+year+".csv"
         csv_file = open(csv_path , "r")
         csv_reader = csv.reader(csv_file)
         c = 0
@@ -94,7 +95,7 @@ def download():
         day_str = date_list[2]
 
         file_name = year_str+"-"+month_num_str+"-"+day_str+"-NSE-EQ.txt"
-        file_path = os.path.join("./nse" , file_name)
+        file_path = os.path.join("/tmp/nse" , file_name)
 
         today_date_time = datetime.date(int(year_str) , int(month_num_str) , int(day_str))
         month_shortForm = today_date_time.strftime("%b")
@@ -103,13 +104,17 @@ def download():
         if download_csv_from_nse(int(year_str)  , int(month_num_str) , int(day_str)):
             if read_CSV_and_write_txt(bhav_copy_name , day_str , month_num_str , year_str):
                 if os.path.exists(file_path):
+                    if os.path.exists("/tmp/bhav_copy"):
+                        shutil.rmtree("/tmp/bhav_copy")
+                    if os.path.exists("/tmp/index"):
+                        shutil.rmtree("/tmp/index")
                     return send_file(file_path, mimetype='text/csv', as_attachment=True, attachment_filename=file_name)
                 else:
                     raise FileNotFoundError("File not found")
             else:
-                raise FileNotFoundError("File not found")
+                raise Exception("Data not found for the entered date or error in read csv and write function")
         else:
-            raise FileNotFoundError("File not found")
+            raise Exception("Data not found for the entered date")
 
         
     except Exception as e:
@@ -117,6 +122,10 @@ def download():
             "error": str(e),
             "message": "An error occurred while processing your request"
         }
+        if os.path.exists("/tmp/bhav_copy"):
+            shutil.rmtree("/tmp/bhav_copy")
+        if os.path.exists("/tmp/index"):
+            shutil.rmtree("/tmp/index")
         return jsonify(error_response), 500
 
 if __name__ == '__main__':
