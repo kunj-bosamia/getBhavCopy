@@ -96,6 +96,9 @@ def index():
 def test():
     file = open("/tmp/nse/ok.txt" , "r")
     print(file.read())
+    return jsonify({
+        "ok" : "ok"
+    }) , 200
 
 
 @app.route('/download', methods=['POST'])
