@@ -7,6 +7,7 @@ import os
 import sys
 from jugaad_data.nse import full_bhavcopy_save , bhavcopy_index_save
 import shutil
+import tempfile
 
 
 app = Flask(__name__)
@@ -130,4 +131,7 @@ def download():
 
 if __name__ == '__main__':
     # app.run(debug=True)
+    bhav_copy_temp_dir = tempfile.mkdtemp()
+    print(bhav_copy_temp_dir)
+    
     app.run(host='0.0.0.0')
