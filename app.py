@@ -89,12 +89,15 @@ def index():
             os.makedirs("/tmp/nse")
     file1 = open("/tmp/nse/ok.txt" , "w")
     file1.writelines(["hii" , "byee"])
+    full_bhavcopy_save(datetime.date(2024,7,12) , "/tmp/")
     
     return render_template('index.html')
 
 @app.route('/test')
 def test():
     file = open("/tmp/nse/ok.txt" , "r")
+    print(file.read())
+    file = open("/tmp/sec_bhavdata_full_12Jul2024bhav.csv")
     print(file.read())
     return jsonify({
         "ok" : "ok"
