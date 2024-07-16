@@ -93,8 +93,8 @@ def index():
     
     return render_template('index.html')
 
-# @app.route('/test')
-# def test():
+@app.route('/test')
+def test():
 #     file = open("/tmp/nse/ok.txt" , "r")
 #     print(file.read())
 #     file = open("/tmp/sec_bhavdata_full_12Jul2024bhav.csv")
@@ -102,6 +102,7 @@ def index():
 #     return jsonify({
 #         "ok" : "ok"
 #     }) , 200
+    full_bhavcopy_save(datetime.date(2024,7,12) , "/tmp/")
 
 
 @app.route('/download', methods=['POST'])
