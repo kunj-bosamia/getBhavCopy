@@ -1,5 +1,8 @@
 Flask==1.1.4
 click==7.1.2
-jugaad-data==0.26
 Jinja2==2.11.3
 MarkupSafe==1.1.1
+requests
+click==7.1.2
+appdirs==1.4.4
+beautifulsoup4==4.9.3

@@ -82,26 +82,26 @@ def read_CSV_and_write_txt(bhav_copy_name , day , month_num , year):
 
 @app.route('/')
 def index():
-    bhav_copy_temp_dir = tempfile.mkdtemp()
-    print(bhav_copy_temp_dir)
-    print("_____________________________________")
-    if not os.path.exists("/tmp/nse"):
-            os.makedirs("/tmp/nse")
-    file1 = open("/tmp/nse/ok.txt" , "w")
-    file1.writelines(["hii" , "byee"])
-    full_bhavcopy_save(datetime.date(2024,7,12) , "/tmp/")
+    # bhav_copy_temp_dir = tempfile.mkdtemp()
+    # print(bhav_copy_temp_dir)
+    # print("_____________________________________")
+    # if not os.path.exists("/tmp/nse"):
+    #         os.makedirs("/tmp/nse")
+    # file1 = open("/tmp/nse/ok.txt" , "w")
+    # file1.writelines(["hii" , "byee"])
+    # full_bhavcopy_save(datetime.date(2024,7,12) , "/tmp/")
     
     return render_template('index.html')
 
-@app.route('/test')
-def test():
-    file = open("/tmp/nse/ok.txt" , "r")
-    print(file.read())
-    file = open("/tmp/sec_bhavdata_full_12Jul2024bhav.csv")
-    print(file.read())
-    return jsonify({
-        "ok" : "ok"
-    }) , 200
+# @app.route('/test')
+# def test():
+#     file = open("/tmp/nse/ok.txt" , "r")
+#     print(file.read())
+#     file = open("/tmp/sec_bhavdata_full_12Jul2024bhav.csv")
+#     print(file.read())
+#     return jsonify({
+#         "ok" : "ok"
+#     }) , 200
 
 
 @app.route('/download', methods=['POST'])
