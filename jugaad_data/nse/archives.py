@@ -92,7 +92,13 @@ class NSEArchives:
                                                       not available for given
                                                       date (2019 and prior
                                                       dates)""") 
-        return r.text
+            else:
+                raise requests.exceptions.ReadTimeout("""Either request timed
+                                                      out or full bhavcopy file is
+                                                      not available for given
+                                                      date (2019 and prior
+                                                      dates)""")
+
 
     def full_bhavcopy_save(self, dt, dest, skip_if_present=True):
         fmt = "sec_bhavdata_full_%d%b%Ybhav.csv"
