@@ -12,12 +12,8 @@
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "app.py"
-      }
-    ],
-    "functions": {
-      "app.py": {
+        "dest": "app.py",
         "maxDuration": 60
       }
-    }
+    ]
 }
