@@ -78,7 +78,7 @@ def writeTxtFile(year , month , day):
 
 app = Flask(__name__)
 
-@app.route('/test')
+@app.route('/')
 def index():
     return render_template('index.html')
 
