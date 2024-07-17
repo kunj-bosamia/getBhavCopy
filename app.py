@@ -1,158 +1,110 @@
 from flask import Flask, request, send_file, render_template, jsonify
-from io import StringIO, BytesIO
-from calendar import month
-import datetime
-import csv
 import os
-import sys
-from jugaad_data.nse import full_bhavcopy_save , bhavcopy_index_save
-import shutil
-import tempfile
+import requests
+
+# year month and day are of type string
+def getFullBhavCopy(year , month , day):
+    try:
+        url = f"https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_{day}{month}{year}.csv"
+        s = requests.Session()
+        h = {
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36",
+            "accept-encoding": "gzip, deflate, br",
+            "accept": """text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9""",
+        }
+        s.headers.update(h)
+        r = s.get(url , timeout=4)
+        if r.status_code == 200:
+            lines = r.text.split("\n")
+            return lines[1:len(lines)-2]
+        return False
+    except Exception as e:
+        print(f"Error in getting full bhav copy function : {e}")
+        return False
+
+# year month and day are of type string
+def getIndexData(year , month , day):
+    try:
+        url = f"https://www.niftyindices.com/Daily_Snapshot/ind_close_all_{day}{month}{year}.csv"
+        s = requests.Session()
+        h = {
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36",
+            "accept-encoding": "gzip, deflate, br",
+            "accept": """text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9""",
+        }
+        s.headers.update(h)
+        r = s.get(url , timeout=4)
+        if r.status_code == 200:
+            lines = r.text.split("\n")
+            return lines[1:len(lines)-2]
+        return False
+    except Exception as e:
+        print(f"Error in getting index data function : {e}")
+
+# year month and day are of type string
+def writeTxtFile(year , month , day):
+    try:
+        fullBhavCopy = getFullBhavCopy(year , month , day)
+        indexData = getIndexData(year , month , day)
+        date_num_text = year+month+day
+        if not fullBhavCopy or not indexData:
+            return False
+
+        rows = []
+        for line in fullBhavCopy:
+            row = line.split(",")
+            if row[1].strip() == "EQ" or row[1].strip() == "BE":
+                r = row[0].strip() + ',' + date_num_text +','+ row[4].strip() +','+ row[5].strip() +','+ row[6].strip() +','+ row[8].strip()+','+ row[10].strip()+"\n"
+                rows.append(r)
+        
+        for line in indexData:
+            row = line.split(",")
+            if row[0] == "Nifty 50":
+                r = "NSENIFTY," + date_num_text +','+ row[2] +','+ row[3] +','+ row[4] +','+ row[5]+',' + row[8]+"\n"
+                rows.append(r)
+            if row[0] == "Nifty Bank":
+                r = "BANKNIFTY," + date_num_text +','+ row[2] +','+ row[3] +','+ row[4] +','+ row[5]+',' + row[8]+"\n"
+                rows.append(r)
+        
+        txt_fileName = "/tmp/"+year+"-"+month+"-"+day+"-NSE-EQ.txt"
+        file1 = open(txt_fileName , "w")
+        file1.writelines(rows)
+        file1.close()
+        return True
+    except Exception as e:
+        print(f"Error in writing txt file : {e}")
+        return False
 
 
 app = Flask(__name__)
 
-# year month and day are integer inputs
-def download_csv_from_nse(year , month , day):
-    try:
-        if not os.path.exists("/tmp/bhav_copy"):
-            os.makedirs("/tmp/bhav_copy")
-        if not os.path.exists("/tmp/index"):
-            os.makedirs("/tmp/index")
-        
-        full_bhavcopy_save(datetime.date(year,month,day) , "/tmp/bhav_copy")
-        bhavcopy_index_save(datetime.date(year,month,day), "/tmp/index")
-        return True
-    except Exception as e:
-        print("Error while downloading CSVs : ",e)
-        return False
-
-# day month_num year are of type string
-def read_CSV_and_write_txt(bhav_copy_name , day , month_num , year):
-    try:
-        if not os.path.exists("/tmp/nse"):
-            os.makedirs("/tmp/nse")
-        
-        txt_fileName = "/tmp/nse/"+year+"-"+month_num+"-"+day+"-NSE-EQ.txt"
-
-        if os.path.exists(txt_fileName):
-            return True
-
-        
-        #bhav copy
-        csv_path  = "/tmp/bhav_copy/"+bhav_copy_name
-        csv_file = open(csv_path , "r")
-        csv_reader = csv.reader(csv_file)
-        date_num_text = year+month_num+day
-        lines = []
-        c = 0
-        for line in csv_reader:
-            if c == 0:
-                c += 1
-                continue
-            if line[1].strip() == "EQ" or line[1].strip() == "BE":
-                row = line[0].strip() + ',' + date_num_text +','+ line[4].strip() +','+ line[5].strip() +','+ line[6].strip() +','+ line[8].strip()+','+ line[10].strip()+"\n"
-                lines.append(row)
-        csv_file.close()
-
-        # index
-        csv_path  = "/tmp/index/"+"ind_close_all_"+day+month_num+year+".csv"
-        csv_file = open(csv_path , "r")
-        csv_reader = csv.reader(csv_file)
-        c = 0
-        for line in csv_reader:
-            if c == 0:
-                c+= 1
-                continue
-            if line[0] == "Nifty 50":
-                row = "NSENIFTY," + date_num_text +','+ line[2] +','+ line[3] +','+ line[4] +','+ line[5]+',' + line[8]+"\n"
-                lines.append(row)
-            if line[0] == "Nifty Bank":
-                row = "BANKNIFTY," + date_num_text +','+ line[2] +','+ line[3] +','+ line[4] +','+ line[5]+',' + line[8]+"\n"
-                lines.append(row)
-        
-        file1 = open(txt_fileName , "w")
-        file1.writelines(lines)
-        file1.close()
-        return True
-    except Exception as e:
-        print("error in read_CSV_and_write_txt function : " ,e )
-        return False
-
 
 @app.route('/')
 def index():
-    # bhav_copy_temp_dir = tempfile.mkdtemp()
-    # print(bhav_copy_temp_dir)
-    # print("_____________________________________")
-    # if not os.path.exists("/tmp/nse"):
-    #         os.makedirs("/tmp/nse")
-    # file1 = open("/tmp/nse/ok.txt" , "w")
-    # file1.writelines(["hii" , "byee"])
-    # full_bhavcopy_save(datetime.date(2024,7,12) , "/tmp/")
-    
     return render_template('index.html')
-
-@app.route('/test')
-def test():
-#     file = open("/tmp/nse/ok.txt" , "r")
-#     print(file.read())
-#     file = open("/tmp/sec_bhavdata_full_12Jul2024bhav.csv")
-#     print(file.read())
-#     return jsonify({
-#         "ok" : "ok"
-#     }) , 200
-    full_bhavcopy_save(datetime.date(2024,7,12) , "/tmp/")
-
 
 @app.route('/download', methods=['POST'])
 def download():
     try:
         date_str = request.form['date']
-        # Assume the CSV file is named based on the date (e.g., '2023-07-06.csv')
-        print(date_str)
         date_list = date_str.split("-")
-        year_str = date_list[0]
-        month_num_str = date_list[1]
-        day_str = date_list[2]
+        year = date_list[0]
+        month = date_list[1]
+        day = date_list[2]
 
-        file_name = year_str+"-"+month_num_str+"-"+day_str+"-NSE-EQ.txt"
-        file_path = os.path.join("/tmp/nse" , file_name)
-
-        today_date_time = datetime.date(int(year_str) , int(month_num_str) , int(day_str))
-        month_shortForm = today_date_time.strftime("%b")
-        bhav_copy_name = "sec_bhavdata_full_"+day_str+month_shortForm+year_str+"bhav.csv"
-
-        if download_csv_from_nse(int(year_str)  , int(month_num_str) , int(day_str)):
-            if read_CSV_and_write_txt(bhav_copy_name , day_str , month_num_str , year_str):
-                if os.path.exists(file_path):
-                    if os.path.exists("/tmp/bhav_copy"):
-                        shutil.rmtree("/tmp/bhav_copy")
-                    if os.path.exists("/tmp/index"):
-                        shutil.rmtree("/tmp/index")
-                    return send_file(file_path, mimetype='text/csv', as_attachment=True, attachment_filename=file_name)
-                else:
-                    raise FileNotFoundError("File not found")
-            else:
-                raise Exception("Data not found for the entered date or error in read csv and write function")
-        else:
-            raise Exception("Data not found for the entered date")
-
-        
+        txt_file_path = "/tmp/"+year+"-"+month+"-"+day+"-NSE-EQ.txt"
+        txt_file_name = year+"-"+month+"-"+day+"-NSE-EQ.txt"
+        if not os.path.exists(txt_file_path):
+            if not writeTxtFile(year , month , day):
+                raise Exception("Either data not found for this day , or some error occurred in writeTxtFile check logs")
+        return send_file(txt_file_path, mimetype='text/csv', as_attachment=True, attachment_filename=txt_file_name)
     except Exception as e:
         error_response = {
             "error": str(e),
             "message": "An error occurred while processing your request"
         }
-        if os.path.exists("/tmp/bhav_copy"):
-            shutil.rmtree("/tmp/bhav_copy")
-        if os.path.exists("/tmp/index"):
-            shutil.rmtree("/tmp/index")
         return jsonify(error_response), 500
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    bhav_copy_temp_dir = tempfile.mkdtemp()
-    print(bhav_copy_temp_dir)
-    
     app.run(host='0.0.0.0')
