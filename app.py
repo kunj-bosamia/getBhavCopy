@@ -79,7 +79,25 @@ def writeTxtFile(year , month , day):
 app = Flask(__name__)
 
 
-@app.route('/')
+# @app.route('/')
+# def index():
+#     url = f"https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_{day}{month}{year}.csv"
+#     s = requests.Session()
+#     h = {
+#         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36",
+#         "accept-encoding": "gzip, deflate, br",
+#         "accept": """text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9""",
+#     }
+#     s.headers.update(h)
+#     r = s.get(url)
+#     if r.status_code == 200:
+#         lines = r.text.split("\n")
+#         print(lines[1:len(lines)-2])
+    
+#     return render_template('index.html')
+
+
+@app.route('/test')
 def index():
     return render_template('index.html')
 
