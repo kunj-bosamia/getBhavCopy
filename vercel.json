@@ -1,16 +1,19 @@
 {
     "version": 2,
     "builds": [
-      {"src": "app.py", "use": "@vercel/python"}
+      {
+        "src": "app.py",
+        "use": "@vercel/python",
+        "config": {
+          "regions": ["bom1"]  // Specify the Mumbai region here
+        }
+      }
     ],
     "routes": [
-      {"src": "/(.*)", "dest": "app.py"}
-    ],
-    "functions": {
-      "app.py": {
-        "regions": ["bom1"] 
+      {
+        "src": "/(.*)",
+        "dest": "app.py"
       }
-    }
+    ]
   }
-  
   
