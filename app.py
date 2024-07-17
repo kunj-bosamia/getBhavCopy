@@ -14,7 +14,7 @@ async def getFullBhavCopy(year , month , day):
             "accept": """text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9""",
         }
         s.headers.update(h)
-        r = s.get(url , timeout=4)
+        r = s.get(url , timeout=30)
         if r.status_code == 200:
             date_num_text = year+month+day
             lines = r.text.split("\n")
@@ -42,7 +42,7 @@ async def getIndexData(year , month , day):
             "accept": """text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9""",
         }
         s.headers.update(h)
-        r = s.get(url , timeout=4)
+        r = s.get(url , timeout=30)
         if r.status_code == 200:
             date_num_text = year+month+day
             lines = r.text.split("\n")
