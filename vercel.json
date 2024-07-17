@@ -5,7 +5,7 @@
         "src": "app.py",
         "use": "@vercel/python",
         "config": {
-          "regions": ["bom1"]  // Specify the Mumbai region here
+          "regions": ["bom1"]
         }
       }
     ],
