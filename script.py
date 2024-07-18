@@ -78,4 +78,5 @@ async def writeTxtFile(year , month , day):
         print(f"Error in writing txt file : {e}")
         return False
 
+
 asyncio.run(writeTxtFile("2024" , "07" , "18"))
