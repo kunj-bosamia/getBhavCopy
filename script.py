@@ -1,4 +1,3 @@
-import os
 import requests
 import asyncio
 from google.oauth2 import service_account
