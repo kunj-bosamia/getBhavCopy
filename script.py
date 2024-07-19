@@ -2,6 +2,10 @@ from flask import Flask, request, send_file, render_template, jsonify
 import os
 import requests
 import asyncio
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from datetime import date
 
 # year month and day are of type string
 async def getFullBhavCopy(year , month , day):
@@ -78,5 +82,27 @@ async def writeTxtFile(year , month , day):
         print(f"Error in writing txt file : {e}")
         return False
 
+def uploadFileOnDrive(year , month , day):
+    SERVICE_ACCOUNT_FILE = 'secret.json'
+    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    service = build('drive', 'v3', credentials=credentials)
 
-asyncio.run(writeTxtFile("2024" , "07" , "18"))
+    # File metadata and path
+    file_metadata = {'name': f'{year}-{month}-{day}-NSE-EQ.txt' , 'parents': ['1wA5duO0osm4mrZ8g5iJuh_pmkr8wD6vG']  }
+    media = MediaFileUpload('/tmp/test.txt', resumable=True)
+
+    # Upload the file
+    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    print('File ID: %s' % file.get('id'))
+
+if __name__ == "__main__":
+    today = date.today()
+    year = today.strftime("%Y")
+    month = today.strftime("%m")
+    day = today.strftime("%d")
+    res = asyncio.run(writeTxtFile(year , month , day))
+    if res:
+        uploadFileOnDrive(year ,month , day)
+
