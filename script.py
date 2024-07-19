@@ -88,14 +88,19 @@ def uploadFileOnDrive(year , month , day):
     credentials = service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     service = build('drive', 'v3', credentials=credentials)
+    
+    file_name = f'{year}-{month}-{day}-NSE-EQ.txt'
+    parent_id = "1wA5duO0osm4mrZ8g5iJuh_pmkr8wD6vG"
+    
+    query = f"name='{file_name}' and '{parent_id}' in parents"
+    results = service.files().list(q=query, fields="files(id, name)").execute()
+    items = results.get('files', [])
 
-    # File metadata and path
-    file_metadata = {'name': f'{year}-{month}-{day}-NSE-EQ.txt' , 'parents': ['1wA5duO0osm4mrZ8g5iJuh_pmkr8wD6vG']  }
-    media = MediaFileUpload('/tmp/test.txt', resumable=True)
-
-    # Upload the file
-    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    print('File ID: %s' % file.get('id'))
+    if not items:
+        file_metadata = {'name': file_name , 'parents': [parent_id]  }
+        media = MediaFileUpload('/tmp/test.txt', resumable=True)
+        file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        print('File ID: %s' % file.get('id'))
 
 if __name__ == "__main__":
     today = date.today()
@@ -105,4 +110,3 @@ if __name__ == "__main__":
     res = asyncio.run(writeTxtFile(year , month , day))
     if res:
         uploadFileOnDrive(year ,month , day)
-
