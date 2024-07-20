@@ -15,7 +15,7 @@ This application provides a comprehensive solution to download daily bhavcopy fi
 
 ## Download the Executable
 
-You can download the latest version of the local GUI application [here](link-to-your-exe-file).
+You can download the latest version of the local GUI application [here](https://github.com/kunj-bosamia/getBhavCopy/raw/main/dist/app.exe).
 
 ### How to Use the Local GUI App
 
@@ -26,7 +26,7 @@ You can download the latest version of the local GUI application [here](link-to-
 
 ## How the Cron Job Works
 
-The cron job is defined in the `.github/workflows/scheduled-script.yml` file. It automatically runs every day at 9:30 PM and uploads the generated TXT file to Google Drive. The file contains the daily market data including open, high, low, close, and volumes of each script, along with Nifty50 and BankNifty data.
+The cron job is defined in the `.github/workflows/cron.yml` file. It automatically runs every day at 9:30 PM and uploads the generated TXT file to Google Drive. The file contains the daily market data including open, high, low, close, and volumes of each script, along with Nifty50 and BankNifty data.
 
 ### Manual Trigger for Cron Job
 
