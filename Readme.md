@@ -15,7 +15,7 @@ This application provides a comprehensive solution to download daily bhavcopy fi
 
 ## Download the Executable
 
-You can download the latest version of the local GUI application [here](https://github.com/kunj-bosamia/getBhavCopy/releases/latest/app.exe).
+You can download the latest version of the local GUI application [here](https://github.com/kunj-bosamia/getBhavCopy/releases/latest/download/app.exe).
 
 ### How to Use the Local GUI App
 
